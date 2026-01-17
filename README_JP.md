@@ -7,9 +7,11 @@ UnityプロジェクトでNotionデータベースのデータを取得・利用
 ## 機能
 
 - **Database Queries**: フィルターを使用したデータベース検索に対応。
+- **Page Search**: データベースやページを名前で検索可能。
 - **Image Download**: Notion上の画像をダウンロードする機能。
 - **Caching**: APIレスポンスをメモリ上にキャッシュ。
 - **Property Helpers**: JSONレスポンスから汎用的に値を抽出するヘルパー。
+- **Editor Tools**: Inspectorからデータベース/ページを取得・閲覧可能。
 
 ## インストール
 
@@ -42,7 +44,6 @@ UnityプロジェクトでNotionデータベースのデータを取得・利用
 
 ```csharp
 using Unition;
-using Cysharp.Threading.Tasks;
 
 public class MyDataLoader : MonoBehaviour
 {
@@ -52,11 +53,16 @@ public class MyDataLoader : MonoBehaviour
     {
         var client = new NotionClient(config.apiKey, config.cacheDuration);
         
-        // データベースをクエリ
+        // IDで直接クエリ
         string json = await client.QueryDatabase("your-database-id");
         
-        // プロパティヘルパーを使ってパース
-        // ... ここに独自のパース処理を記述
+        // 名前で検索 (v1.1.0+)
+        string dbId = await client.FindDatabaseIdByName("Cards");
+        string cardsJson = await client.QueryDatabase(dbId);
+        
+        // ページも名前で検索可能
+        string pageId = await client.FindPageIdByName("Rules");
+        string pageJson = await client.GetPage(pageId);
     }
 }
 ```

@@ -7,9 +7,11 @@ A lightweight Unity client for Notion API. Fetch data from Notion databases and 
 ## Features
 
 - **Database Queries**: Query Notion databases with filters.
+- **Page Search**: Find databases and pages by name at runtime.
 - **Image Download**: Helper to download images from Notion URLs.
 - **Caching**: Built-in memory cache for API responses.
-- **Property Helpers**: Static methods to extract properties from generic JSON responses.
+- **Property Helpers**: Static methods to extract properties from JSON responses.
+- **Editor Tools**: Fetch and browse databases/pages directly in Inspector.
 
 ## Installation
 
@@ -41,7 +43,6 @@ Create a config asset via **Assets > Create > Unition > Notion Config** and ente
 
 ```csharp
 using Unition;
-using Cysharp.Threading.Tasks;
 
 public class MyDataLoader : MonoBehaviour
 {
@@ -51,11 +52,16 @@ public class MyDataLoader : MonoBehaviour
     {
         var client = new NotionClient(config.apiKey, config.cacheDuration);
         
-        // Query a database
+        // Query by ID
         string json = await client.QueryDatabase("your-database-id");
         
-        // Parse the response using property helpers
-        // ... your custom parsing logic here
+        // Or find by name (v1.1.0+)
+        string dbId = await client.FindDatabaseIdByName("Cards");
+        string cardsJson = await client.QueryDatabase(dbId);
+        
+        // Find pages by name
+        string pageId = await client.FindPageIdByName("Rules");
+        string pageJson = await client.GetPage(pageId);
     }
 }
 ```

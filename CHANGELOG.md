@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-01-18
+
+### Added
+- **Page Search**: `FindPageIdByName()`, `GetAllPages()`, `SearchPagesAsync()` for searching pages by name.
+- **Database Name Resolution**: `FindDatabaseIdByName()` for searching databases by name at runtime.
+- **Fetch Pages Button**: Editor now fetches both databases and pages, displayed in separate foldout sections.
+- **Open Notion Integrations**: Quick button to open Notion integrations page when API key is missing.
+
+### Changed
+- Renamed "Fetch Databases" to "Fetch Pages" in Config editor (fetches both databases and pages).
+- Improved editor UI with foldable sections and icons.
+
+---
+
 ## [1.0.0] - 2026-01-18
 
 ### Added
