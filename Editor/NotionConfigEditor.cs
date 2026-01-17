@@ -252,6 +252,11 @@ namespace Unition.Editor
                     "API Key is required.\nGet one from: notion.so/my-integrations",
                     MessageType.Warning
                 );
+                
+                if (GUILayout.Button("Open Notion Integrations"))
+                {
+                    Application.OpenURL("https://www.notion.so/my-integrations");
+                }
             }
             
             // Cache Duration
