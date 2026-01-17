@@ -164,6 +164,110 @@ namespace Unition
         }
 
         /// <summary>
+        /// Search for databases accessible by this integration (async version).
+        /// </summary>
+        public async Task<string> SearchDatabasesAsync()
+        {
+            string cacheKey = "search_databases";
+            
+            // Check cache
+            if (cache.TryGetValue(cacheKey, out var cached) && Time.time < cached.expiry)
+            {
+                return cached.data;
+            }
+
+            string url = $"{BASE_URL}/search";
+            string body = "{\"filter\":{\"property\":\"object\",\"value\":\"database\"}}";
+            
+            var request = new UnityWebRequest(url, "POST");
+            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
+            request.downloadHandler = new DownloadHandlerBuffer();
+            
+            SetHeaders(request);
+            
+            var operation = request.SendWebRequest();
+            while (!operation.isDone)
+            {
+                await Task.Yield();
+            }
+            
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Notion Search Error: {request.error}\n{request.downloadHandler.text}");
+                request.Dispose();
+                return null;
+            }
+            
+            string result = request.downloadHandler.text;
+            request.Dispose();
+            
+            // Cache result
+            if (cacheDuration > 0)
+            {
+                cache[cacheKey] = (result, Time.time + cacheDuration);
+            }
+            
+            return result;
+        }
+
+        /// <summary>
+        /// Find a database ID by its name (title).
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="databaseName">The name of the database to find (case-insensitive partial match).</param>
+        public async Task<string> FindDatabaseIdByName(string databaseName)
+        {
+            if (string.IsNullOrEmpty(databaseName))
+            {
+                Debug.LogWarning("[Unition] FindDatabaseIdByName: databaseName is null or empty.");
+                return null;
+            }
+
+            string json = await SearchDatabasesAsync();
+            if (string.IsNullOrEmpty(json))
+            {
+                return null;
+            }
+
+            var databases = NotionSearchParser.ParseDatabases(json);
+            string searchName = databaseName.ToLower();
+
+            // First, try exact match
+            foreach (var db in databases)
+            {
+                if (db.title.ToLower() == searchName)
+                {
+                    return db.id;
+                }
+            }
+
+            // Then, try contains match
+            foreach (var db in databases)
+            {
+                if (db.title.ToLower().Contains(searchName))
+                {
+                    return db.id;
+                }
+            }
+
+            Debug.LogWarning($"[Unition] Database not found: '{databaseName}'");
+            return null;
+        }
+
+        /// <summary>
+        /// Get all accessible databases.
+        /// </summary>
+        public async Task<List<NotionDatabaseInfo>> GetAllDatabases()
+        {
+            string json = await SearchDatabasesAsync();
+            if (string.IsNullOrEmpty(json))
+            {
+                return new List<NotionDatabaseInfo>();
+            }
+            return NotionSearchParser.ParseDatabases(json);
+        }
+
+        /// <summary>
         /// Clear the cache.
         /// </summary>
         public void ClearCache()
