@@ -210,9 +210,13 @@ namespace Unition.Editor
     {
         private bool showApiKey = false;
         private List<NotionDatabaseInfo> fetchedDatabases = null;
+        private List<NotionPageInfo> fetchedPages = null;
         private bool isFetching = false;
         private string fetchError = null;
-        private Vector2 scrollPos;
+        private Vector2 dbScrollPos;
+        private Vector2 pageScrollPos;
+        private bool showDatabases = true;
+        private bool showPages = true;
 
         public override void OnInspectorGUI()
         {
@@ -256,13 +260,13 @@ namespace Unition.Editor
             
             EditorGUILayout.Space();
             
-            // Fetch Databases Button
-            EditorGUILayout.LabelField("Database Browser", EditorStyles.boldLabel);
+            // Fetch Button
+            EditorGUILayout.LabelField("Content Browser", EditorStyles.boldLabel);
             
             EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(config.apiKey) || isFetching);
-            if (GUILayout.Button(isFetching ? "Fetching..." : "Fetch Databases"))
+            if (GUILayout.Button(isFetching ? "Fetching..." : "Fetch Pages"))
             {
-                FetchDatabases(config.apiKey);
+                FetchAll(config.apiKey);
             }
             EditorGUI.EndDisabledGroup();
             
@@ -271,29 +275,60 @@ namespace Unition.Editor
                 EditorGUILayout.HelpBox(fetchError, MessageType.Error);
             }
             
-            // Database List
+            // Databases Section
             if (fetchedDatabases != null && fetchedDatabases.Count > 0)
             {
                 EditorGUILayout.Space();
-                EditorGUILayout.LabelField($"Found {fetchedDatabases.Count} Databases", EditorStyles.miniLabel);
+                showDatabases = EditorGUILayout.Foldout(showDatabases, $"Databases ({fetchedDatabases.Count})", true);
                 
-                scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.MaxHeight(150));
-                
-                foreach (var db in fetchedDatabases)
+                if (showDatabases)
                 {
-                    EditorGUILayout.BeginHorizontal("box");
-                    EditorGUILayout.LabelField(db.title, GUILayout.Width(150));
-                    EditorGUILayout.SelectableLabel(db.id, GUILayout.Height(16));
+                    dbScrollPos = EditorGUILayout.BeginScrollView(dbScrollPos, GUILayout.MaxHeight(120));
                     
-                    if (GUILayout.Button("Copy", GUILayout.Width(50)))
+                    foreach (var db in fetchedDatabases)
                     {
-                        EditorGUIUtility.systemCopyBuffer = db.id;
-                        Debug.Log($"Copied: {db.id}");
+                        EditorGUILayout.BeginHorizontal("box");
+                        EditorGUILayout.LabelField("📊 " + db.title, GUILayout.Width(180));
+                        EditorGUILayout.SelectableLabel(db.id, GUILayout.Height(16));
+                        
+                        if (GUILayout.Button("Copy", GUILayout.Width(45)))
+                        {
+                            EditorGUIUtility.systemCopyBuffer = db.id;
+                            Debug.Log($"Copied: {db.id}");
+                        }
+                        EditorGUILayout.EndHorizontal();
                     }
-                    EditorGUILayout.EndHorizontal();
+                    
+                    EditorGUILayout.EndScrollView();
                 }
+            }
+            
+            // Pages Section
+            if (fetchedPages != null && fetchedPages.Count > 0)
+            {
+                EditorGUILayout.Space();
+                showPages = EditorGUILayout.Foldout(showPages, $"Pages ({fetchedPages.Count})", true);
                 
-                EditorGUILayout.EndScrollView();
+                if (showPages)
+                {
+                    pageScrollPos = EditorGUILayout.BeginScrollView(pageScrollPos, GUILayout.MaxHeight(120));
+                    
+                    foreach (var page in fetchedPages)
+                    {
+                        EditorGUILayout.BeginHorizontal("box");
+                        EditorGUILayout.LabelField("📄 " + page.title, GUILayout.Width(180));
+                        EditorGUILayout.SelectableLabel(page.id, GUILayout.Height(16));
+                        
+                        if (GUILayout.Button("Copy", GUILayout.Width(45)))
+                        {
+                            EditorGUIUtility.systemCopyBuffer = page.id;
+                            Debug.Log($"Copied: {page.id}");
+                        }
+                        EditorGUILayout.EndHorizontal();
+                    }
+                    
+                    EditorGUILayout.EndScrollView();
+                }
             }
             
             EditorGUILayout.Space();
@@ -314,33 +349,39 @@ namespace Unition.Editor
             }
         }
         
-        private void FetchDatabases(string apiKey)
+        private void FetchAll(string apiKey)
         {
             isFetching = true;
             fetchError = null;
             fetchedDatabases = null;
+            fetchedPages = null;
             
             try
             {
                 var client = new NotionClient(apiKey, 0);
-                string json = client.SearchDatabasesSync();
                 
-                if (string.IsNullOrEmpty(json))
+                // Fetch databases
+                string dbJson = client.SearchDatabasesSync();
+                if (!string.IsNullOrEmpty(dbJson))
                 {
-                    fetchError = "Failed to fetch databases.";
+                    fetchedDatabases = NotionSearchParser.ParseDatabases(dbJson);
+                }
+                
+                // Fetch pages (sync version needed)
+                string pageJson = SearchPagesSync(client, apiKey);
+                if (!string.IsNullOrEmpty(pageJson))
+                {
+                    fetchedPages = NotionSearchParser.ParsePages(pageJson);
+                }
+                
+                int totalCount = (fetchedDatabases?.Count ?? 0) + (fetchedPages?.Count ?? 0);
+                if (totalCount == 0)
+                {
+                    fetchError = "No content found.";
                 }
                 else
                 {
-                    fetchedDatabases = NotionSearchParser.ParseDatabases(json);
-                    
-                    if (fetchedDatabases.Count == 0)
-                    {
-                        fetchError = "No databases found.";
-                    }
-                    else
-                    {
-                        Debug.Log($"[Unition] Fetched {fetchedDatabases.Count} databases");
-                    }
+                    Debug.Log($"[Unition] Fetched {fetchedDatabases?.Count ?? 0} databases, {fetchedPages?.Count ?? 0} pages");
                 }
             }
             catch (System.Exception e)
@@ -352,6 +393,38 @@ namespace Unition.Editor
             {
                 isFetching = false;
             }
+        }
+        
+        private string SearchPagesSync(NotionClient client, string apiKey)
+        {
+            string url = "https://api.notion.com/v1/search";
+            string body = "{\"filter\":{\"property\":\"object\",\"value\":\"page\"}}";
+            
+            var request = new UnityEngine.Networking.UnityWebRequest(url, "POST");
+            request.uploadHandler = new UnityEngine.Networking.UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(body));
+            request.downloadHandler = new UnityEngine.Networking.DownloadHandlerBuffer();
+            
+            request.SetRequestHeader("Authorization", $"Bearer {apiKey}");
+            request.SetRequestHeader("Notion-Version", "2022-06-28");
+            request.SetRequestHeader("Content-Type", "application/json");
+            
+            var operation = request.SendWebRequest();
+            
+            while (!operation.isDone)
+            {
+                System.Threading.Thread.Sleep(10);
+            }
+            
+            if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Notion Search Error: {request.error}");
+                request.Dispose();
+                return null;
+            }
+            
+            string result = request.downloadHandler.text;
+            request.Dispose();
+            return result;
         }
     }
 }
