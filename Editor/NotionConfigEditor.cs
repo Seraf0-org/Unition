@@ -201,4 +201,157 @@ namespace Unition.Editor
             }
         }
     }
+
+    /// <summary>
+    /// Custom editor for NotionConfig ScriptableObject.
+    /// </summary>
+    [CustomEditor(typeof(NotionConfig))]
+    public class NotionConfigEditor : UnityEditor.Editor
+    {
+        private bool showApiKey = false;
+        private List<NotionDatabaseInfo> fetchedDatabases = null;
+        private bool isFetching = false;
+        private string fetchError = null;
+        private Vector2 scrollPos;
+
+        public override void OnInspectorGUI()
+        {
+            var config = (NotionConfig)target;
+            
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Unition - Notion Config", EditorStyles.boldLabel);
+            EditorGUILayout.Space();
+            
+            // API Key
+            EditorGUILayout.LabelField("API Settings", EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("API Key", GUILayout.Width(EditorGUIUtility.labelWidth));
+            
+            if (showApiKey)
+            {
+                config.apiKey = EditorGUILayout.TextField(config.apiKey);
+            }
+            else
+            {
+                config.apiKey = EditorGUILayout.PasswordField(config.apiKey);
+            }
+            
+            if (GUILayout.Button(showApiKey ? "Hide" : "Show", GUILayout.Width(50)))
+            {
+                showApiKey = !showApiKey;
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            if (string.IsNullOrEmpty(config.apiKey))
+            {
+                EditorGUILayout.HelpBox(
+                    "API Key is required.\nGet one from: notion.so/my-integrations",
+                    MessageType.Warning
+                );
+            }
+            
+            // Cache Duration
+            config.cacheDuration = EditorGUILayout.FloatField("Cache Duration (s)", config.cacheDuration);
+            if (config.cacheDuration < 0) config.cacheDuration = 0;
+            
+            EditorGUILayout.Space();
+            
+            // Fetch Databases Button
+            EditorGUILayout.LabelField("Database Browser", EditorStyles.boldLabel);
+            
+            EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(config.apiKey) || isFetching);
+            if (GUILayout.Button(isFetching ? "Fetching..." : "Fetch Databases"))
+            {
+                FetchDatabases(config.apiKey);
+            }
+            EditorGUI.EndDisabledGroup();
+            
+            if (!string.IsNullOrEmpty(fetchError))
+            {
+                EditorGUILayout.HelpBox(fetchError, MessageType.Error);
+            }
+            
+            // Database List
+            if (fetchedDatabases != null && fetchedDatabases.Count > 0)
+            {
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField($"Found {fetchedDatabases.Count} Databases", EditorStyles.miniLabel);
+                
+                scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.MaxHeight(150));
+                
+                foreach (var db in fetchedDatabases)
+                {
+                    EditorGUILayout.BeginHorizontal("box");
+                    EditorGUILayout.LabelField(db.title, GUILayout.Width(150));
+                    EditorGUILayout.SelectableLabel(db.id, GUILayout.Height(16));
+                    
+                    if (GUILayout.Button("Copy", GUILayout.Width(50)))
+                    {
+                        EditorGUIUtility.systemCopyBuffer = db.id;
+                        Debug.Log($"Copied: {db.id}");
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
+                
+                EditorGUILayout.EndScrollView();
+            }
+            
+            EditorGUILayout.Space();
+            
+            // Validation
+            if (config.IsValid())
+            {
+                EditorGUILayout.HelpBox("Configuration is valid.", MessageType.Info);
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("API Key is required.", MessageType.Warning);
+            }
+            
+            if (GUI.changed)
+            {
+                EditorUtility.SetDirty(config);
+            }
+        }
+        
+        private void FetchDatabases(string apiKey)
+        {
+            isFetching = true;
+            fetchError = null;
+            fetchedDatabases = null;
+            
+            try
+            {
+                var client = new NotionClient(apiKey, 0);
+                string json = client.SearchDatabasesSync();
+                
+                if (string.IsNullOrEmpty(json))
+                {
+                    fetchError = "Failed to fetch databases.";
+                }
+                else
+                {
+                    fetchedDatabases = NotionSearchParser.ParseDatabases(json);
+                    
+                    if (fetchedDatabases.Count == 0)
+                    {
+                        fetchError = "No databases found.";
+                    }
+                    else
+                    {
+                        Debug.Log($"[Unition] Fetched {fetchedDatabases.Count} databases");
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                fetchError = $"Error: {e.Message}";
+                Debug.LogException(e);
+            }
+            finally
+            {
+                isFetching = false;
+            }
+        }
+    }
 }
