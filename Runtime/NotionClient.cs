@@ -244,6 +244,41 @@ namespace Union
 #endif
 
         /// <summary>
+        /// Search for databases accessible by this integration.
+        /// Works synchronously for Editor use.
+        /// </summary>
+        public string SearchDatabasesSync()
+        {
+            string url = $"{BASE_URL}/search";
+            string body = "{\"filter\":{\"property\":\"object\",\"value\":\"database\"}}";
+            
+            var request = new UnityWebRequest(url, "POST");
+            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
+            request.downloadHandler = new DownloadHandlerBuffer();
+            
+            SetHeaders(request);
+            
+            var operation = request.SendWebRequest();
+            
+            // Busy wait for Editor (not ideal but works for small requests)
+            while (!operation.isDone)
+            {
+                System.Threading.Thread.Sleep(10);
+            }
+            
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Notion Search Error: {request.error}\n{request.downloadHandler.text}");
+                request.Dispose();
+                return null;
+            }
+            
+            string result = request.downloadHandler.text;
+            request.Dispose();
+            return result;
+        }
+
+        /// <summary>
         /// Clear the cache.
         /// </summary>
         public void ClearCache()
