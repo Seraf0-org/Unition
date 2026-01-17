@@ -13,7 +13,13 @@ A lightweight Unity client for Notion API. Fetch data from Notion databases and 
 
 ## Installation
 
-### Via Git URL (Recommended)
+### Unity Package Manager (Recommended)
+
+1. Open **Window > Package Manager**
+2. Click **+ > Add package from git URL...**
+3. Enter `https://github.com/Seraf0-org/Unition.git`
+
+### Via manifest.json
 
 Add the following to your `Packages/manifest.json`:
 
@@ -21,16 +27,6 @@ Add the following to your `Packages/manifest.json`:
 {
   "dependencies": {
     "com.seraf.unition": "https://github.com/Seraf0-org/Unition.git"
-  }
-}
-```
-
-### Via Local Path (Development)
-
-```json
-{
-  "dependencies": {
-    "com.seraf.unition": "file:../Unition"
   }
 }
 ```

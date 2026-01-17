@@ -13,7 +13,13 @@ UnityプロジェクトでNotionデータベースのデータを取得・利用
 
 ## インストール
 
-### Git URL経由（推奨）
+### Unity Package Manager (推奨)
+
+1. Unityで **Window > Package Manager** を開く
+2. 左上の **+ > Add package from git URL...** をクリック
+3. `https://github.com/Seraf0-org/Unition.git` を入力してAdd
+
+### manifest.json を編集する場合
 
 `Packages/manifest.json` に以下を追加してください：
 
@@ -21,16 +27,6 @@ UnityプロジェクトでNotionデータベースのデータを取得・利用
 {
   "dependencies": {
     "com.seraf.unition": "https://github.com/Seraf0-org/Unition.git"
-  }
-}
-```
-
-### ローカルパス経由（開発用）
-
-```json
-{
-  "dependencies": {
-    "com.seraf.unition": "file:../Unition"
   }
 }
 ```
