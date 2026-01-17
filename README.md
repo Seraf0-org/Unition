@@ -1,3 +1,5 @@
+[English](README.md) | [日本語](README_JP.md)
+
 # Unition - Notion Unity Bridge
 
 A lightweight Unity client for Notion API. Fetch data from Notion databases and use it in your Unity projects.
