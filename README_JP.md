@@ -6,12 +6,12 @@ UnityプロジェクトでNotionデータベースのデータを取得・利用
 
 ## 機能
 
-- 🔌 **シンプルAPI** - Unityで扱いやすいNotionクライアント
-- 📦 **UPM対応** - Unity Package Manager経由でインストール可能
-- 🗄️ **データベースクエリ** - フィルター対応のNotionデータベース検索
-- 🖼️ **画像ダウンロード** - Notionからの画像ダウンロード機能
-- ⚡ **キャッシュ機能** - APIレスポンスのメモリ内キャッシュ機能
-- 🔧 **プロパティヘルパー** - JSONレスポンスから簡単に値を抽出
+- **Simple API**: Unityから使いやすいNotion APIクライアント。
+- **UPM Ready**: Unity Package Manager経由でインストール可能。
+- **Database Queries**: フィルターを使用したデータベース検索に対応。
+- **Image Download**: Notion上の画像をダウンロードする機能。
+- **Caching**: APIレスポンスをメモリ上にキャッシュ。
+- **Property Helpers**: JSONレスポンスから汎用的に値を抽出するヘルパー。
 
 ## インストール
 
