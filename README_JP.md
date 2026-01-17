@@ -6,8 +6,6 @@ UnityプロジェクトでNotionデータベースのデータを取得・利用
 
 ## 機能
 
-- **Simple API**: Unityから使いやすいNotion APIクライアント。
-- **UPM Ready**: Unity Package Manager経由でインストール可能。
 - **Database Queries**: フィルターを使用したデータベース検索に対応。
 - **Image Download**: Notion上の画像をダウンロードする機能。
 - **Caching**: APIレスポンスをメモリ上にキャッシュ。

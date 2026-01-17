@@ -6,8 +6,6 @@ A lightweight Unity client for Notion API. Fetch data from Notion databases and 
 
 ## Features
 
-- **Simple API**: Easy to use Notion client for Unity.
-- **UPM Ready**: Install via Unity Package Manager.
 - **Database Queries**: Query Notion databases with filters.
 - **Image Download**: Helper to download images from Notion URLs.
 - **Caching**: Built-in memory cache for API responses.
