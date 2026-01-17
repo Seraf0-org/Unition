@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Union
+namespace Unition
 {
     /// <summary>
     /// Represents a Notion database's basic info.

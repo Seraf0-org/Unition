@@ -1,8 +1,8 @@
 {
-    "name": "Union.Editor",
-    "rootNamespace": "Union.Editor",
+    "name": "Unition.Editor",
+    "rootNamespace": "Unition.Editor",
     "references": [
-        "Union"
+        "Unition"
     ],
     "includePlatforms": [
         "Editor"

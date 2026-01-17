@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 #endif
 
-namespace Union.Samples
+namespace Unition.Samples
 {
     /// <summary>
     /// Sample data loader demonstrating Union usage.

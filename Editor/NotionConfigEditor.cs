@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 
-namespace Union.Editor
+namespace Unition.Editor
 {
     [CustomEditor(typeof(NotionConfig))]
     public class NotionConfigEditor : UnityEditor.Editor

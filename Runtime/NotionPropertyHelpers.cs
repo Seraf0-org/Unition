@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Union
+namespace Unition
 {
     /// <summary>
     /// Helper methods for extracting property values from Notion API JSON responses.

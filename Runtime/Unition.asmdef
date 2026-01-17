@@ -1,6 +1,6 @@
 {
-    "name": "Union",
-    "rootNamespace": "Union",
+    "name": "Unition",
+    "rootNamespace": "Unition",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -9,12 +9,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [
-        {
-            "name": "com.cysharp.unitask",
-            "expression": "",
-            "define": "UNION_UNITASK"
-        }
-    ],
+    "versionDefines": [],
     "noEngineReferences": false
 }

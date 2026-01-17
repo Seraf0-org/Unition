@@ -1,12 +1,12 @@
 using UnityEngine;
 
-namespace Union
+namespace Unition
 {
     /// <summary>
     /// Configuration for Notion API connection.
     /// Create via Assets > Create > Union > Notion Config
     /// </summary>
-    [CreateAssetMenu(fileName = "NotionConfig", menuName = "Union/Notion Config")]
+    [CreateAssetMenu(fileName = "NotionConfig", menuName = "Unition/Notion Config")]
     public class NotionConfig : ScriptableObject
     {
         [Header("API Settings")]

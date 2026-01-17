@@ -4,11 +4,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-#if UNION_UNITASK
-using Cysharp.Threading.Tasks;
-#endif
-
-namespace Union
+namespace Unition
 {
     /// <summary>
     /// HTTP client for Notion API requests.
@@ -30,118 +26,8 @@ namespace Union
             this.cacheDuration = cacheDuration;
         }
 
-#if UNION_UNITASK
         /// <summary>
-        /// Query a database and return all results (UniTask version).
-        /// </summary>
-        public async UniTask<string> QueryDatabase(string databaseId, string filter = null)
-        {
-            string cacheKey = $"db_{databaseId}_{filter?.GetHashCode()}";
-            
-            // Check cache
-            if (cache.TryGetValue(cacheKey, out var cached) && Time.time < cached.expiry)
-            {
-                return cached.data;
-            }
-
-            string url = $"{BASE_URL}/databases/{databaseId}/query";
-            string body = filter ?? "{}";
-            
-            var request = new UnityWebRequest(url, "POST");
-            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
-            request.downloadHandler = new DownloadHandlerBuffer();
-            
-            SetHeaders(request);
-            
-            try
-            {
-                await request.SendWebRequest();
-                
-                if (request.result != UnityWebRequest.Result.Success)
-                {
-                    Debug.LogError($"Notion API Error: {request.error}\n{request.downloadHandler.text}");
-                    return null;
-                }
-                
-                string result = request.downloadHandler.text;
-                
-                // Cache result
-                if (cacheDuration > 0)
-                {
-                    cache[cacheKey] = (result, Time.time + cacheDuration);
-                }
-                
-                return result;
-            }
-            finally
-            {
-                request.Dispose();
-            }
-        }
-
-        /// <summary>
-        /// Get a single page by ID (UniTask version).
-        /// </summary>
-        public async UniTask<string> GetPage(string pageId)
-        {
-            string url = $"{BASE_URL}/pages/{pageId}";
-            
-            var request = UnityWebRequest.Get(url);
-            SetHeaders(request);
-            
-            try
-            {
-                await request.SendWebRequest();
-                
-                if (request.result != UnityWebRequest.Result.Success)
-                {
-                    Debug.LogError($"Notion API Error: {request.error}");
-                    return null;
-                }
-                
-                return request.downloadHandler.text;
-            }
-            finally
-            {
-                request.Dispose();
-            }
-        }
-
-        /// <summary>
-        /// Download image from URL (UniTask version).
-        /// </summary>
-        public async UniTask<Texture2D> DownloadImage(string imageUrl)
-        {
-            if (string.IsNullOrEmpty(imageUrl)) return null;
-            
-            UnityWebRequest request = null;
-            try
-            {
-                request = UnityWebRequestTexture.GetTexture(imageUrl);
-                await request.SendWebRequest();
-                
-                if (request.result != UnityWebRequest.Result.Success)
-                {
-                    Debug.LogWarning($"Failed to download image from {imageUrl}: {request.error}");
-                    return null;
-                }
-                
-                return DownloadHandlerTexture.GetContent(request);
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogWarning($"Exception downloading image from {imageUrl}: {e.Message}");
-                return null;
-            }
-            finally
-            {
-                request?.Dispose();
-            }
-        }
-#else
-        /// <summary>
-        /// Query a database and return all results (Coroutine/Task version).
-        /// Use with StartCoroutine or await with Task.
+        /// Query a database and return all results.
         /// </summary>
         public async Task<string> QueryDatabase(string databaseId, string filter = null)
         {
@@ -188,7 +74,7 @@ namespace Union
         }
 
         /// <summary>
-        /// Get a single page by ID (Task version).
+        /// Get a single page by ID.
         /// </summary>
         public async Task<string> GetPage(string pageId)
         {
@@ -216,7 +102,7 @@ namespace Union
         }
 
         /// <summary>
-        /// Download image from URL (Task version).
+        /// Download image from URL.
         /// </summary>
         public async Task<Texture2D> DownloadImage(string imageUrl)
         {
@@ -241,7 +127,6 @@ namespace Union
             request.Dispose();
             return texture;
         }
-#endif
 
         /// <summary>
         /// Search for databases accessible by this integration.

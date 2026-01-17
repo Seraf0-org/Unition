@@ -1,4 +1,4 @@
-# Union - Notion Unity Bridge
+# Unition - Notion Unity Bridge
 
 A lightweight Unity client for Notion API. Fetch data from Notion databases and use it in your Unity projects.
 
@@ -20,7 +20,7 @@ Add the following to your `Packages/manifest.json`:
 ```json
 {
   "dependencies": {
-    "com.seraf.union": "https://github.com/Seraf0-org/Union.git"
+    "com.seraf.unition": "https://github.com/Seraf0-org/Unition.git"
   }
 }
 ```
@@ -30,7 +30,7 @@ Add the following to your `Packages/manifest.json`:
 ```json
 {
   "dependencies": {
-    "com.seraf.union": "file:../Union"
+    "com.seraf.unition": "file:../Unition"
   }
 }
 ```
@@ -39,12 +39,12 @@ Add the following to your `Packages/manifest.json`:
 
 ### 1. Create a Notion Config
 
-Create a config asset via **Assets > Create > Union > Notion Config** and enter your Notion API key.
+Create a config asset via **Assets > Create > Unition > Notion Config** and enter your Notion API key.
 
 ### 2. Query a Database
 
 ```csharp
-using Union;
+using Unition;
 using Cysharp.Threading.Tasks;
 
 public class MyDataLoader : MonoBehaviour
@@ -69,7 +69,7 @@ public class MyDataLoader : MonoBehaviour
 Use the `NotionPropertyHelpers` to extract data from Notion's JSON response:
 
 ```csharp
-using Union;
+using Unition;
 
 // Extract various property types
 string title = NotionPropertyHelpers.ExtractTitleProperty(pageJson, "Name");

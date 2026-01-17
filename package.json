@@ -1,12 +1,12 @@
 {
-    "name": "com.seraf.union",
+    "name": "com.seraf.unition",
     "version": "1.0.0",
-    "displayName": "Union - Notion Unity Bridge",
+    "displayName": "Unition - Notion Unity Bridge",
     "description": "A lightweight Unity client for Notion API. Fetch data from Notion databases and use it in your Unity projects.",
     "unity": "2021.3",
-    "documentationUrl": "https://github.com/Seraf0-org/Union",
-    "changelogUrl": "https://github.com/Seraf0-org/Union/blob/main/CHANGELOG.md",
-    "licensesUrl": "https://github.com/Seraf0-org/Union/blob/main/LICENSE",
+    "documentationUrl": "https://github.com/Seraf0-org/Unition",
+    "changelogUrl": "https://github.com/Seraf0-org/Unition/blob/main/CHANGELOG.md",
+    "licensesUrl": "https://github.com/Seraf0-org/Unition/blob/main/LICENSE",
     "dependencies": {},
     "keywords": [
         "notion",
