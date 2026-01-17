@@ -36,6 +36,31 @@ namespace Unition.Editor
             Application.OpenURL("https://github.com/Seraf0-org/Unition");
         }
 
+        [MenuItem("Unition/Create Notion Config")]
+        public static void CreateNotionConfig()
+        {
+            var config = ScriptableObject.CreateInstance<NotionConfig>();
+            
+            string path = EditorUtility.SaveFilePanelInProject(
+                "Save Notion Config",
+                "NotionConfig",
+                "asset",
+                "Choose where to save the Notion Config asset"
+            );
+            
+            if (!string.IsNullOrEmpty(path))
+            {
+                AssetDatabase.CreateAsset(config, path);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+                
+                EditorUtility.FocusProjectWindow();
+                Selection.activeObject = config;
+                
+                Debug.Log($"[Unition] Created NotionConfig at: {path}");
+            }
+        }
+
         private void OnGUI()
         {
             EditorGUILayout.Space(10);
