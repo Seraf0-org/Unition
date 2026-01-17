@@ -268,6 +268,110 @@ namespace Unition
         }
 
         /// <summary>
+        /// Search for pages accessible by this integration (async).
+        /// </summary>
+        public async Task<string> SearchPagesAsync()
+        {
+            string cacheKey = "search_pages";
+            
+            // Check cache
+            if (cache.TryGetValue(cacheKey, out var cached) && Time.time < cached.expiry)
+            {
+                return cached.data;
+            }
+
+            string url = $"{BASE_URL}/search";
+            string body = "{\"filter\":{\"property\":\"object\",\"value\":\"page\"}}";
+            
+            var request = new UnityWebRequest(url, "POST");
+            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
+            request.downloadHandler = new DownloadHandlerBuffer();
+            
+            SetHeaders(request);
+            
+            var operation = request.SendWebRequest();
+            while (!operation.isDone)
+            {
+                await Task.Yield();
+            }
+            
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Notion Search Error: {request.error}\n{request.downloadHandler.text}");
+                request.Dispose();
+                return null;
+            }
+            
+            string result = request.downloadHandler.text;
+            request.Dispose();
+            
+            // Cache result
+            if (cacheDuration > 0)
+            {
+                cache[cacheKey] = (result, Time.time + cacheDuration);
+            }
+            
+            return result;
+        }
+
+        /// <summary>
+        /// Find a page ID by its name (title).
+        /// Returns null if not found.
+        /// </summary>
+        /// <param name="pageName">The name of the page to find (case-insensitive partial match).</param>
+        public async Task<string> FindPageIdByName(string pageName)
+        {
+            if (string.IsNullOrEmpty(pageName))
+            {
+                Debug.LogWarning("[Unition] FindPageIdByName: pageName is null or empty.");
+                return null;
+            }
+
+            string json = await SearchPagesAsync();
+            if (string.IsNullOrEmpty(json))
+            {
+                return null;
+            }
+
+            var pages = NotionSearchParser.ParsePages(json);
+            string searchName = pageName.ToLower();
+
+            // First, try exact match
+            foreach (var page in pages)
+            {
+                if (page.title.ToLower() == searchName)
+                {
+                    return page.id;
+                }
+            }
+
+            // Then, try contains match
+            foreach (var page in pages)
+            {
+                if (page.title.ToLower().Contains(searchName))
+                {
+                    return page.id;
+                }
+            }
+
+            Debug.LogWarning($"[Unition] Page not found: '{pageName}'");
+            return null;
+        }
+
+        /// <summary>
+        /// Get all accessible pages.
+        /// </summary>
+        public async Task<List<NotionPageInfo>> GetAllPages()
+        {
+            string json = await SearchPagesAsync();
+            if (string.IsNullOrEmpty(json))
+            {
+                return new List<NotionPageInfo>();
+            }
+            return NotionSearchParser.ParsePages(json);
+        }
+
+        /// <summary>
         /// Clear the cache.
         /// </summary>
         public void ClearCache()
