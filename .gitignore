@@ -34,3 +34,6 @@ Thumbs.db
 *.secret
 *secrets*
 NotionConstants.cs
+
+Editor/PackageExporter.cs
+Editor/PackageExporter.cs.meta
