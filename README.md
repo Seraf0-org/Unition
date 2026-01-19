@@ -83,6 +83,40 @@ List<string> relatedIds = NotionPropertyHelpers.ExtractRelationProperty(pageJson
 string imageUrl = NotionPropertyHelpers.ExtractImageUrl(pageJson, "Cover");
 ```
 
+## Advanced Usage: Extending Configuration
+
+You can extend `NotionConfig` to add project-specific database IDs and helper methods. This allows you to manage all your game data references in one place.
+
+```csharp
+using UnityEngine;
+using Unition;
+
+[CreateAssetMenu(fileName = "GameConfig", menuName = "Game/Notion Config")]
+public class GameNotionConfig : NotionConfig
+{
+    [Header("Game Databases")]
+    public string charactersDatabaseName = "Characters";
+    public string itemsDatabaseName = "Items";
+
+    // Runtime cache for resolved IDs
+    private string _charactersDbId;
+    private string _itemsDbId;
+
+    /// <summary>
+    /// Resolve database IDs by name at startup.
+    /// </summary>
+    public async void ResolveDatabases()
+    {
+        var client = new NotionClient(apiKey, cacheDuration);
+        _charactersDbId = await client.FindDatabaseIdByName(charactersDatabaseName);
+        _itemsDbId = await client.FindDatabaseIdByName(itemsDatabaseName);
+    }
+
+    public string GetCharactersDbId() => _charactersDbId;
+    public string GetItemsDbId() => _itemsDbId;
+}
+```
+
 ## Requirements
 
 - Unity 2021.3 or later

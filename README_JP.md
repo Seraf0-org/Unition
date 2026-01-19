@@ -84,6 +84,40 @@ List<string> relatedIds = NotionPropertyHelpers.ExtractRelationProperty(pageJson
 string imageUrl = NotionPropertyHelpers.ExtractImageUrl(pageJson, "Cover");
 ```
 
+## 応用：設定の拡張 (NotionConfig)
+
+`NotionConfig` クラスを継承することで、プロジェクト固有のデータベースIDやヘルパーメソッドを追加できます。これにより、ゲームデータの参照を一箇所で管理できます。
+
+```csharp
+using UnityEngine;
+using Unition;
+
+[CreateAssetMenu(fileName = "GameConfig", menuName = "Game/Notion Config")]
+public class GameNotionConfig : NotionConfig
+{
+    [Header("Game Databases")]
+    public string charactersDatabaseName = "Characters";
+    public string itemsDatabaseName = "Items";
+
+    // 解決されたIDを保持する変数
+    private string _charactersDbId;
+    private string _itemsDbId;
+
+    /// <summary>
+    /// 起動時にデータベース名をIDに解決
+    /// </summary>
+    public async void ResolveDatabases()
+    {
+        var client = new NotionClient(apiKey, cacheDuration);
+        _charactersDbId = await client.FindDatabaseIdByName(charactersDatabaseName);
+        _itemsDbId = await client.FindDatabaseIdByName(itemsDatabaseName);
+    }
+
+    public string GetCharactersDbId() => _charactersDbId;
+    public string GetItemsDbId() => _itemsDbId;
+}
+```
+
 ## 要件
 
 - Unity 2021.3 以降
