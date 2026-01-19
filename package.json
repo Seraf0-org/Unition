@@ -1,6 +1,6 @@
 {
     "name": "com.seraf.unition",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "displayName": "Unition - Notion Unity Bridge",
     "description": "A lightweight Unity client for Notion API. Fetch data from Notion databases and use it in your Unity projects.",
     "unity": "2021.3",

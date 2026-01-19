@@ -123,20 +123,28 @@ public class GameDataManager : MonoBehaviour
 }
 ```
 
-### 3. Extending for Custom Projects
+### 3. Generate Keys for Type Safety (v1.2.1+)
 
-You can still extend `NotionConfig` for project-specific needs:
+Click **"Generate Keys Class"** in the Inspector to create a constants file:
 
 ```csharp
-[CreateAssetMenu(fileName = "GameConfig", menuName = "Game/Notion Config")]
-public class GameNotionConfig : NotionConfig
+// Auto-generated: NotionDbKeys.cs
+namespace Unition.Generated
 {
-    // Add custom fields or methods here
-    public override bool IsValid()
+    public static class NotionDbKeys
     {
-        return base.IsValid() && databaseMappings.Count > 0;
+        public const string Cards = "cards";
+        public const string Items = "items";
     }
 }
+```
+
+Now you get IDE autocomplete:
+
+```csharp
+using Unition.Generated;
+
+string cardsId = config.GetDatabaseId(NotionDbKeys.Cards);  // ✓ Autocomplete!
 ```
 
 ## Requirements

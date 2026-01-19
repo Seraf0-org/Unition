@@ -124,20 +124,28 @@ public class GameDataManager : MonoBehaviour
 }
 ```
 
-### 3. プロジェクト固有の拡張
+### 3. キークラスの自動生成 (v1.2.1+)
 
-必要に応じて `NotionConfig` を継承してカスタマイズも可能です：
+Inspectorで **「Generate Keys Class」** ボタンを押すと定数クラスが生成されます：
 
 ```csharp
-[CreateAssetMenu(fileName = "GameConfig", menuName = "Game/Notion Config")]
-public class GameNotionConfig : NotionConfig
+// 自動生成: NotionDbKeys.cs
+namespace Unition.Generated
 {
-    // カスタムフィールドやメソッドを追加
-    public override bool IsValid()
+    public static class NotionDbKeys
     {
-        return base.IsValid() && databaseMappings.Count > 0;
+        public const string Cards = "cards";
+        public const string Items = "items";
     }
 }
+```
+
+これでIDE補完が効くようになります：
+
+```csharp
+using Unition.Generated;
+
+string cardsId = config.GetDatabaseId(NotionDbKeys.Cards);  // ✓ 補完が効く！
 ```
 
 ## 要件
