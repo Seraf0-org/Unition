@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-01-19
+
+### Added
+- **Database Mappings**: Define key-name pairs in Inspector, resolve all at runtime with `ResolveAllAsync()`.
+- **GetDatabaseId(key)**: Retrieve resolved database ID by key.
+- **Editor UI**: Add/remove mappings, quick-add from fetched database list.
+
+### Changed
+- `NotionConfig.IsValid()` is now `virtual` for easier extension.
+
+---
+
 ## [1.1.0] - 2026-01-18
 
 ### Added

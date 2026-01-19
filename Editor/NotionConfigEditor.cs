@@ -338,6 +338,84 @@ namespace Unition.Editor
             
             EditorGUILayout.Space();
             
+            // Database Mappings Section
+            EditorGUILayout.LabelField("Database Mappings", EditorStyles.boldLabel);
+            
+            if (config.databaseMappings.Count == 0)
+            {
+                EditorGUILayout.HelpBox("No database mappings defined. Add mappings to resolve database names to IDs at runtime.", MessageType.Info);
+            }
+            else
+            {
+                for (int i = 0; i < config.databaseMappings.Count; i++)
+                {
+                    var mapping = config.databaseMappings[i];
+                    
+                    EditorGUILayout.BeginHorizontal("box");
+                    
+                    // Key
+                    EditorGUILayout.LabelField("Key:", GUILayout.Width(30));
+                    mapping.key = EditorGUILayout.TextField(mapping.key, GUILayout.Width(80));
+                    
+                    // Database Name
+                    EditorGUILayout.LabelField("Name:", GUILayout.Width(40));
+                    mapping.databaseName = EditorGUILayout.TextField(mapping.databaseName, GUILayout.Width(120));
+                    
+                    // Status indicator
+                    if (mapping.IsResolved)
+                    {
+                        EditorGUILayout.LabelField("✓", GUILayout.Width(20));
+                    }
+                    else
+                    {
+                        EditorGUILayout.LabelField("○", GUILayout.Width(20));
+                    }
+                    
+                    // Remove button
+                    if (GUILayout.Button("×", GUILayout.Width(25)))
+                    {
+                        config.databaseMappings.RemoveAt(i);
+                        EditorUtility.SetDirty(config);
+                        break;
+                    }
+                    
+                    EditorGUILayout.EndHorizontal();
+                }
+            }
+            
+            // Add mapping button
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("+ Add Mapping"))
+            {
+                config.databaseMappings.Add(new DatabaseMapping { key = "new_key", databaseName = "" });
+                EditorUtility.SetDirty(config);
+            }
+            
+            // Quick add from fetched databases
+            if (fetchedDatabases != null && fetchedDatabases.Count > 0)
+            {
+                if (GUILayout.Button("+ Add from List..."))
+                {
+                    var menu = new GenericMenu();
+                    foreach (var db in fetchedDatabases)
+                    {
+                        string dbTitle = db.title;
+                        string suggestedKey = db.title.ToLower().Replace(" ", "_");
+                        menu.AddItem(new GUIContent(dbTitle), false, () => {
+                            config.databaseMappings.Add(new DatabaseMapping { 
+                                key = suggestedKey, 
+                                databaseName = dbTitle 
+                            });
+                            EditorUtility.SetDirty(config);
+                        });
+                    }
+                    menu.ShowAsContext();
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            EditorGUILayout.Space();
+            
             // Validation
             if (config.IsValid())
             {

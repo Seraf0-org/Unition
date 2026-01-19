@@ -83,37 +83,59 @@ List<string> relatedIds = NotionPropertyHelpers.ExtractRelationProperty(pageJson
 string imageUrl = NotionPropertyHelpers.ExtractImageUrl(pageJson, "Cover");
 ```
 
-## Advanced Usage: Extending Configuration
+## Advanced Usage: Database Mappings (v1.2.0+)
 
-You can extend `NotionConfig` to add project-specific database IDs and helper methods. This allows you to manage all your game data references in one place.
+Instead of hardcoding database IDs, you can define **key-name mappings** in the Inspector and resolve them at runtime.
+
+### 1. Setup in Inspector
+
+Add mappings in your `NotionConfig` asset:
+
+| Key | Database Name |
+|-----|---------------|
+| `cards` | Cards |
+| `items` | Items Database |
+| `enemies` | Enemies |
+
+### 2. Resolve at Runtime
 
 ```csharp
-using UnityEngine;
 using Unition;
 
+public class GameDataManager : MonoBehaviour
+{
+    public NotionConfig config;
+    
+    async void Start()
+    {
+        var client = new NotionClient(config.apiKey, config.cacheDuration);
+        
+        // Resolve all mappings
+        await config.ResolveAllAsync(client);
+        
+        // Get resolved IDs by key
+        string cardsDbId = config.GetDatabaseId("cards");
+        string itemsDbId = config.GetDatabaseId("items");
+        
+        // Query databases
+        string cardsJson = await client.QueryDatabase(cardsDbId);
+    }
+}
+```
+
+### 3. Extending for Custom Projects
+
+You can still extend `NotionConfig` for project-specific needs:
+
+```csharp
 [CreateAssetMenu(fileName = "GameConfig", menuName = "Game/Notion Config")]
 public class GameNotionConfig : NotionConfig
 {
-    [Header("Game Databases")]
-    public string charactersDatabaseName = "Characters";
-    public string itemsDatabaseName = "Items";
-
-    // Runtime cache for resolved IDs
-    private string _charactersDbId;
-    private string _itemsDbId;
-
-    /// <summary>
-    /// Resolve database IDs by name at startup.
-    /// </summary>
-    public async void ResolveDatabases()
+    // Add custom fields or methods here
+    public override bool IsValid()
     {
-        var client = new NotionClient(apiKey, cacheDuration);
-        _charactersDbId = await client.FindDatabaseIdByName(charactersDatabaseName);
-        _itemsDbId = await client.FindDatabaseIdByName(itemsDatabaseName);
+        return base.IsValid() && databaseMappings.Count > 0;
     }
-
-    public string GetCharactersDbId() => _charactersDbId;
-    public string GetItemsDbId() => _itemsDbId;
 }
 ```
 
